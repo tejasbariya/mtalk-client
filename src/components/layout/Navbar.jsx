@@ -128,6 +128,7 @@ export default function Navbar() {
         </button>
 
         {user ? (
+          <Link to="/profile">
           <div style={{
             display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 10px 4px 4px',
             background: 'var(--glass-bg)', border: '1px solid var(--border-dim)',
@@ -144,6 +145,7 @@ export default function Navbar() {
             </div>
             <ChevronDown size={13} style={{ color: 'var(--text-muted)' }} />
           </div>
+          </Link>
         ) : (
           <Link to="/login">
             <button className="btn-primary" style={{ height: 38, padding: '0 18px', fontSize: '13px' }}>Sign In</button>
