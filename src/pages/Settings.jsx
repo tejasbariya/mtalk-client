@@ -1,6 +1,8 @@
 import { Settings as SettingsIcon, Upload, Bell, User, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
+import { deleteAccount } from '../api/apiClient'; 
+import { toast } from '../components/ToastProvider.jsx'; 
 
 export default function Settings() {
   const logout = useStore((state) => state.logout);
@@ -11,6 +13,24 @@ export default function Settings() {
     logout(); 
     navigate('/login'); 
   };
+  
+  // Handle Delete Account 
+  const handleDeleteAccount = async () => {
+  const confirmDelete = window.confirm(
+    "Are you absolutely sure? This will permanently delete your account and cannot be undone."
+  );
+
+  if (!confirmDelete) return;
+
+  try {
+    await deleteAccount();
+    logout();
+    navigate('/');
+    toast.success('Your account has been deleted.');
+  } catch (err) {
+    console.error("Failed to delete account:", err);
+  }
+};
 
   return (
     <div style={{ maxWidth: '720px', margin: '0 auto' }}>
@@ -102,7 +122,7 @@ export default function Settings() {
             <button onClick={handleLogout} style={{ padding: '8px 20px', borderRadius: 'var(--radius-full)', background: 'transparent', border: '1px solid var(--text-muted)', color: 'var(--text-primary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', transition: 'var(--transition-base)' }}>
               Log Out
             </button>
-            <button style={{ padding: '8px 20px', borderRadius: 'var(--radius-full)', background: 'var(--crimson-subtle)', border: '1px solid var(--border-crimson)', color: 'var(--crimson-warm)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', transition: 'var(--transition-base)' }}>
+            <button onClick={handleDeleteAccount} style={{ padding: '8px 20px', borderRadius: 'var(--radius-full)', background: 'var(--crimson-subtle)', border: '1px solid var(--border-crimson)', color: 'var(--crimson-warm)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', transition: 'var(--transition-base)' }}>
               Delete Account
             </button>
           </div>
