@@ -1,6 +1,17 @@
 import { Settings as SettingsIcon, Upload, Bell, User, Shield } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useStore } from '../store/useStore';
 
 export default function Settings() {
+  const logout = useStore((state) => state.logout);
+  const navigate = useNavigate(); 
+  
+  // Handle Logout
+  const handleLogout = () => {
+    logout(); 
+    navigate('/login'); 
+  };
+
   return (
     <div style={{ maxWidth: '720px', margin: '0 auto' }}>
       <h1 className="section-heading" style={{ marginBottom: '28px' }}>
@@ -84,10 +95,17 @@ export default function Settings() {
             <Shield size={17} color="var(--crimson-warm)" />
             <h2 style={{ fontSize: '15px', fontWeight: 700 }}>Danger Zone</h2>
           </div>
-          <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '14px' }}>Permanently delete your account and all your data.</p>
-          <button style={{ padding: '8px 20px', borderRadius: 'var(--radius-full)', background: 'var(--crimson-subtle)', border: '1px solid var(--border-crimson)', color: 'var(--crimson-warm)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', transition: 'var(--transition-base)' }}>
-            Delete Account
-          </button>
+          <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '14px' }}>
+            Log out of your current session or permanently delete your account and all your data.
+          </p>
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <button onClick={handleLogout} style={{ padding: '8px 20px', borderRadius: 'var(--radius-full)', background: 'transparent', border: '1px solid var(--text-muted)', color: 'var(--text-primary)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', transition: 'var(--transition-base)' }}>
+              Log Out
+            </button>
+            <button style={{ padding: '8px 20px', borderRadius: 'var(--radius-full)', background: 'var(--crimson-subtle)', border: '1px solid var(--border-crimson)', color: 'var(--crimson-warm)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', transition: 'var(--transition-base)' }}>
+              Delete Account
+            </button>
+          </div>
         </div>
 
       </div>
