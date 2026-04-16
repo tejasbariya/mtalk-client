@@ -25,6 +25,10 @@ API.interceptors.response.use(
     if (!status) {
       // Network error — server is likely down
       toast.error('Cannot reach the server. Please check your connection.');
+    } else if (status === 401) {
+      // Session invalid or expired
+      useStore.getState().logout();
+      window.location.href = '/login';
     } else if (status === 503) {
       toast.error('Database is temporarily unavailable. Try again shortly.');
     } else if (status === 500) {
