@@ -1,6 +1,9 @@
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { fetchTitleDetails } from '../api/anilist';
+import { addToLibrary } from '../api/apiClient';
+import { useStore } from '../store/useStore';
+import { toast } from '../components/ToastProvider.jsx';
 import { Star, Library, MessageSquare, Info, BookOpen, AlertCircle, CheckCircle } from 'lucide-react';
 
 const statusMap = {
@@ -19,6 +22,32 @@ export default function TitleDetails() {
     queryKey: ['title', id],
     queryFn: () => fetchTitleDetails(Number(id)),
   });
+
+  const user = useStore(state => state.user);
+
+  const handleAddToLibrary = async () => {
+    if (!user) {
+      toast.error('You must be logged in to add titles to your library.');
+      return;
+    }
+
+    try {
+      await addToLibrary({
+        titleId: title.id,
+        user: { id: user.id, username: user.username },
+        status: 'Reading', // Default status
+        titleDetails: {
+          title: title.title.english || title.title.romaji,
+          coverImage: title.coverImage.extraLarge,
+          status: title.status
+        }
+      });
+      toast.success('Successfully added to library!');
+    } catch (err) {
+      console.error('Failed to add to library:', err);
+      toast.error('Failed to add to library. Please try again.');
+    }
+  };
 
   if (isLoading) return (
     <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
@@ -79,7 +108,7 @@ export default function TitleDetails() {
             </h1>
 
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-              <button className="btn-primary" style={{ fontSize: '13px', padding: '8px 18px' }}>
+              <button onClick={handleAddToLibrary} className="btn-primary" style={{ fontSize: '13px', padding: '8px 18px' }}>
                 <Library size={15} /> Add to Library
               </button>
               <button className="btn-ghost" style={{ fontSize: '13px', padding: '8px 18px' }}>
