@@ -1,6 +1,8 @@
 # MTalk Client
 
 > **"The Ultimate Manhwa & Manhua Social Hub"** — Frontend
+> 
+> **Live Demo:** [mtalk-client.vercel.app](https://mtalk-client.vercel.app)
 
 This is the Vite + React 18 frontend for the **MTalk** platform. It uses **Tailwind CSS v4**, **Framer Motion**, **TanStack Query v5**, **Zustand**, and **Socket.io-client** for a premium, real-time, glassmorphic dark UI experience.
 
