@@ -1,36 +1,37 @@
 import { Settings as SettingsIcon, Upload, Bell, User, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
-import { deleteAccount } from '../api/apiClient'; 
-import { toast } from '../components/ToastProvider.jsx'; 
+import { deleteAccount } from '../api/apiClient';
+import { toast } from '../components/ToastProvider.jsx';
 
 export default function Settings() {
   const logout = useStore((state) => state.logout);
-  const navigate = useNavigate(); 
-  
+  const navigate = useNavigate();
+
   // Handle Logout
   const handleLogout = () => {
-    logout(); 
-    navigate('/login'); 
+    logout();
+    navigate('/login');
   };
-  
+
   // Handle Delete Account 
   const handleDeleteAccount = async () => {
-  const confirmDelete = window.confirm(
-    "Are you absolutely sure? This will permanently delete your account and cannot be undone."
-  );
+    const confirmDelete = window.confirm(
+      "Are you absolutely sure? This will permanently delete your account and cannot be undone."
+    );
 
-  if (!confirmDelete) return;
+    if (!confirmDelete) return;
 
-  try {
-    await deleteAccount();
-    logout();
-    navigate('/');
-    toast.success('Your account has been deleted.');
-  } catch (err) {
-    console.error("Failed to delete account:", err);
-  }
-};
+    try {
+      await deleteAccount();
+      logout();
+      navigate('/');
+      toast.success('Your account has been deleted.');
+    } catch (err) {
+      console.error("Failed to delete account:", err);
+      toast.error('Failed to delete account. Please try again.');
+    }
+  };
 
   return (
     <div style={{ maxWidth: '720px', margin: '0 auto' }}>
