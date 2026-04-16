@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { useStore } from '../store/useStore';
 import { toast } from '../components/ToastProvider.jsx';
 
 const API = axios.create({
@@ -8,7 +9,7 @@ const API = axios.create({
 
 // ── Attach JWT to every request ───────────────────────────────
 API.interceptors.request.use((config) => {
-  const token = localStorage.getItem('mtalk_token');
+  const token = useStore.getState().token;
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
