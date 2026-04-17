@@ -1,10 +1,11 @@
+import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchTitleDetails } from '../api/anilist';
-import { addToLibrary } from '../api/apiClient';
+import { addToLibrary, submitReview, getTitleReviews } from '../api/apiClient';
 import { useStore } from '../store/useStore';
 import { toast } from '../components/ToastProvider.jsx';
-import { Star, Library, MessageSquare, Info, BookOpen, AlertCircle, CheckCircle } from 'lucide-react';
+import { Star, Library, MessageSquare, Info, BookOpen, AlertCircle, CheckCircle, X, Loader2 } from 'lucide-react';
 
 const statusMap = {
   RELEASING: { label: 'Ongoing', cls: 'badge-green' },
@@ -22,8 +23,16 @@ export default function TitleDetails() {
     queryKey: ['title', id],
     queryFn: () => fetchTitleDetails(Number(id)),
   });
+  const queryClient = useQueryClient();
+
+  const { data: reviews, isLoading: isReviewsLoading } = useQuery({ 
+    queryKey: ['reviews', id], 
+    queryFn: async () => (await getTitleReviews(id)).data 
+  });
 
   const user = useStore(state => state.user);
+  const [showModal, setShowModal] = useState(false);
+  const [reviewForm, setReviewForm] = useState({ content: '', rating: 10 });
 
   const handleAddToLibrary = async () => {
     if (!user) {
@@ -46,6 +55,26 @@ export default function TitleDetails() {
     } catch (err) {
       console.error('Failed to add to library:', err);
       toast.error('Failed to add to library. Please try again.');
+    }
+  };
+
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    if (!user) return toast.error('You must be logged in to post a review.');
+    if (!reviewForm.content.trim()) return toast.error('Review content cannot be empty.');
+
+    try {
+      await submitReview({
+        titleId: id,
+        content: reviewForm.content,
+        rating: reviewForm.rating
+      });
+      toast.success('Review posted successfully!');
+      queryClient.invalidateQueries({ queryKey: ['reviews', id] });
+      setReviewForm({ content: '', rating: 10 });
+      setShowModal(false);
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to post review. Is the title in your library?');
     }
   };
 
@@ -144,12 +173,37 @@ export default function TitleDetails() {
               <h3 style={{ fontSize: '15px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Star size={16} color="var(--gold-warm)" /> Community Reviews
               </h3>
-              <button className="btn-ghost" style={{ fontSize: '12px', padding: '6px 14px' }}>Write a Review</button>
+              <button onClick={() => setShowModal(true)} className="btn-ghost" style={{ fontSize: '12px', padding: '6px 14px' }}>Write a Review</button>
             </div>
-            <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-muted)', fontSize: '14px' }}>
-              <AlertCircle size={36} style={{ marginBottom: 12, opacity: 0.3, margin: '0 auto 12px' }} />
-              <p>No reviews yet. Be the first!</p>
-            </div>
+            {isReviewsLoading ? (
+              <div style={{ textAlign: 'center', padding: '24px' }}><Loader2 className="animate-spin" size={20} style={{ margin: '0 auto', opacity: 0.5 }} /></div>
+            ) : reviews?.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {reviews.map(rev => (
+                  <div key={rev._id} style={{ padding: '16px', background: 'var(--bg-card)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-dim)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                      <img 
+                        src={rev.user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${rev.user?.username}`} 
+                        alt="" 
+                        style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover' }} 
+                      />
+                      <div style={{ fontSize: '13px', fontWeight: 700 }}>
+                        {rev.user?.username}
+                        <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 400, marginTop: 2 }}>
+                          <Star size={10} color="var(--gold-warm)" fill="var(--gold-warm)" style={{ display: 'inline', position: 'relative', top: '-1px' }} /> {rev.rating}/10
+                        </div>
+                      </div>
+                    </div>
+                    <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>{rev.content}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-muted)', fontSize: '14px' }}>
+                <AlertCircle size={36} style={{ marginBottom: 12, opacity: 0.3, margin: '0 auto 12px' }} />
+                <p>No reviews yet. Be the first!</p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -197,6 +251,45 @@ export default function TitleDetails() {
           .title-grid { grid-template-columns: 1fr !important; }
         }
       `}</style>
+
+      {/* ── Review Modal ── */}
+      {showModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 }}>
+          <div style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-muted)', borderRadius: 'var(--radius-xl)', width: '100%', maxWidth: '500px', padding: '24px', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h3 style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)', fontFamily: 'Space Grotesk, sans-serif' }}>Write a Review</h3>
+              <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}><X size={20} /></button>
+            </div>
+            <form onSubmit={handleReviewSubmit}>
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Rating (1-10)</label>
+                <input 
+                  type="number" min="1" max="10" 
+                  value={reviewForm.rating} 
+                  onChange={e => setReviewForm({ ...reviewForm, rating: parseInt(e.target.value) })}
+                  className="input-base" 
+                  style={{ width: '80px', height: '40px', textAlign: 'center', fontSize: '16px', fontWeight: 700 }} 
+                />
+              </div>
+              <div style={{ marginBottom: '24px' }}>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Your Review</label>
+                <textarea 
+                  rows={6} 
+                  value={reviewForm.content}
+                  onChange={e => setReviewForm({ ...reviewForm, content: e.target.value })}
+                  className="input-base" 
+                  placeholder="Share your thoughts on this title..."
+                  style={{ width: '100%', padding: '12px', resize: 'vertical', fontSize: '14px', lineHeight: 1.5 }}
+                />
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+                <button type="button" onClick={() => setShowModal(false)} className="btn-ghost" style={{ padding: '10px 20px', fontSize: '13px' }}>Cancel</button>
+                <button type="submit" className="btn-primary" style={{ padding: '10px 24px', fontSize: '13px' }}>Submit Review</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
