@@ -3,22 +3,35 @@ import { io } from 'socket.io-client';
 import { useStore } from '../store/useStore';
 import { Send, Hash, Users, Circle } from 'lucide-react';
 
-const MOCK_ONLINE = ['ShadowMonarch', 'HeavenlyDemon', 'VoidWalker', 'Returner001', 'BloodPact'];
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5005';
 
 export default function GlobalChat() {
   const user = useStore(state => state.user);
   const [messages, setMessages] = useState([]);
+  const [members, setMembers] = useState([]);
   const [input, setInput] = useState('');
   const socketRef = useRef(null);
   const endRef = useRef(null);
 
   useEffect(() => {
     socketRef.current = io(API_URL);
-    socketRef.current.emit('join_global');
+    
+    // Join with user data for member tracking
+    socketRef.current.emit('join_global', user ? { 
+      id: user.id, 
+      username: user.username, 
+      avatar: user.avatar 
+    } : null);
+
+    // Fetch last 50 messages
+    socketRef.current.emit('get_history', 'global');
+
+    socketRef.current.on('chat_history', (history) => setMessages(history));
     socketRef.current.on('receive_message', (msg) => setMessages(p => [...p, msg]));
+    socketRef.current.on('room_members', (m) => setMembers(m));
+
     return () => socketRef.current?.disconnect();
-  }, []);
+  }, [user]);
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
@@ -123,19 +136,19 @@ export default function GlobalChat() {
       <div style={{ width: '220px', flexShrink: 0, display: 'flex', flexDirection: 'column', background: 'var(--bg-elevated)', borderRadius: 'var(--radius-xl)', border: '1px solid var(--border-dim)', overflow: 'hidden' }} className="chat-sidebar">
         <div style={{ padding: '16px 16px 12px', borderBottom: '1px solid var(--border-dim)', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Users size={15} color="var(--blue-neon)" />
-          <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Online · {MOCK_ONLINE.length}</span>
+          <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Online · {members.length}</span>
         </div>
         <div style={{ overflow: 'auto', padding: '10px 8px' }} className="hide-scrollbar">
-          {MOCK_ONLINE.map(name => (
-            <div key={name} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px', borderRadius: 'var(--radius-md)', cursor: 'pointer', transition: 'var(--transition-base)' }}
+          {members.map((m, idx) => (
+            <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px', borderRadius: 'var(--radius-md)', cursor: 'pointer', transition: 'var(--transition-base)' }}
               onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'}
               onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
             >
               <div style={{ position: 'relative' }}>
-                <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`} style={{ width: 32, height: 32, borderRadius: '50%', border: '1.5px solid var(--border-dim)' }} alt="" />
+                <img src={m.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${m.username}`} style={{ width: 32, height: 32, borderRadius: '50%', border: '1.5px solid var(--border-dim)' }} alt="" />
                 <span style={{ position: 'absolute', bottom: 0, right: 0, width: 9, height: 9, borderRadius: '50%', background: 'var(--green-bright)', border: '2px solid var(--bg-elevated)', boxShadow: '0 0 5px var(--green-glow)' }} />
               </div>
-              <span style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text-secondary)' }}>{name}</span>
+              <span style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text-secondary)' }}>{m.username}</span>
             </div>
           ))}
         </div>
