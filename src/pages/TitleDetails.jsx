@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchTitleDetails } from '../api/anilist';
-import { addToLibrary, submitReview, getTitleReviews } from '../api/apiClient';
 import { useStore } from '../store/useStore';
 import { toast } from '../components/ToastProvider.jsx';
-import { Star, Library, MessageSquare, Info, BookOpen, AlertCircle, CheckCircle, X, Loader2 } from 'lucide-react';
+import { Star, Library, MessageSquare, Info, BookOpen, AlertCircle, CheckCircle, X, Loader2, Trash2 } from 'lucide-react';
+import { addToLibrary, submitReview, getTitleReviews, deleteReview } from '../api/apiClient';
 
 const statusMap = {
   RELEASING: { label: 'Ongoing', cls: 'badge-green' },
@@ -75,6 +75,17 @@ export default function TitleDetails() {
       setShowModal(false);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to post review. Is the title in your library?');
+    }
+  };
+
+  const handleDeleteReview = async (reviewId) => {
+    if (!window.confirm('Are you sure you want to delete this review?')) return;
+    try {
+      await deleteReview(reviewId);
+      toast.success('Review deleted');
+      queryClient.invalidateQueries({ queryKey: ['reviews', id] });
+    } catch (err) {
+      toast.error('Failed to delete review');
     }
   };
 
@@ -187,12 +198,22 @@ export default function TitleDetails() {
                         alt="" 
                         style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover' }} 
                       />
-                      <div style={{ fontSize: '13px', fontWeight: 700 }}>
+                      <div style={{ fontSize: '13px', fontWeight: 700, flex: 1 }}>
                         {rev.user?.username}
                         <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 400, marginTop: 2 }}>
                           <Star size={10} color="var(--gold-warm)" fill="var(--gold-warm)" style={{ display: 'inline', position: 'relative', top: '-1px' }} /> {rev.rating}/10
                         </div>
                       </div>
+                      {rev.user?._id === user?.id && (
+                        <button 
+                          onClick={() => handleDeleteReview(rev._id)}
+                          style={{ background: 'none', border: 'none', color: 'var(--text-dim)', cursor: 'pointer', padding: '4px', borderRadius: 'var(--radius-sm)', transition: 'var(--transition-base)' }}
+                          onMouseEnter={e => e.currentTarget.style.color = 'var(--crimson-bright)'}
+                          onMouseLeave={e => e.currentTarget.style.color = 'var(--text-dim)'}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      )}
                     </div>
                     <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>{rev.content}</p>
                   </div>
