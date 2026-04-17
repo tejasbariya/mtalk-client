@@ -1,4 +1,4 @@
-import { Settings as SettingsIcon, Upload, Bell, User, Shield } from 'lucide-react';
+import { Settings as SettingsIcon, Upload, Bell, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { deleteAccount } from '../api/apiClient';
@@ -56,25 +56,6 @@ export default function Settings() {
             <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>or click to browse files</p>
             <input type="file" accept=".xml" style={{ display: 'none' }} />
           </label>
-        </div>
-
-        {/* Profile */}
-        <div style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-xl)', padding: '24px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-            <User size={18} color="var(--blue-neon)" />
-            <h2 style={{ fontSize: '16px', fontWeight: 700, fontFamily: 'Space Grotesk, sans-serif' }}>Profile</h2>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            <div>
-              <label style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.08em', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>Username</label>
-              <input className="input-base" placeholder="your username" />
-            </div>
-            <div>
-              <label style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.08em', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>Bio</label>
-              <textarea className="input-base" rows={3} placeholder="Tell the community about yourself..." style={{ resize: 'vertical', lineHeight: 1.6 }} />
-            </div>
-            <button className="btn-primary" style={{ alignSelf: 'flex-start', fontSize: 13 }}>Save Changes</button>
-          </div>
         </div>
 
         {/* Notifications */}
