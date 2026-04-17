@@ -9,6 +9,9 @@ export const useStore = create(
       setAuth: (user, token) => {
         set({ user, token });
       },
+      setUser: (user) => {
+        set({ user });
+      },
       logout: () => {
         set({ user: null, token: null });
       },

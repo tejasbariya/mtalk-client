@@ -19,7 +19,7 @@ API.interceptors.response.use(
   (res) => res,
   (err) => {
     // Don't toast on 401 — those are handled in-component (login/register forms)
-    const status  = err?.response?.status;
+    const status = err?.response?.status;
     const message = err?.response?.data?.message || err?.message;
 
     if (!status) {
@@ -40,10 +40,14 @@ API.interceptors.response.use(
   }
 );
 
+// Auth 
 export const registerUser = (data) => API.post('/api/auth/register', data);
-export const loginUser    = (data) => API.post('/api/auth/login', data);
-export const getMe        = ()     => API.get('/api/auth/me');
-export const deleteAccount= () => API.delete('/api/auth/me');
+export const loginUser = (data) => API.post('/api/auth/login', data);
+export const getMe = () => API.get('/api/auth/me');
+export const updateProfile = (data) => API.put('/api/auth/me', data);
+export const deleteAccount = () => API.delete('/api/auth/me');
+
+// Library
 export const addToLibrary = (data) => API.post('/api/library', data);
-export const getLibrary   = () => API.get('/api/library');
+export const getLibrary = () => API.get('/api/library');
 export default API;
