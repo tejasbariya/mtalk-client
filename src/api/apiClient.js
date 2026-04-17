@@ -46,6 +46,7 @@ export const loginUser = (data) => API.post('/api/auth/login', data);
 export const getMe = () => API.get('/api/auth/me');
 export const updateProfile = (data) => API.put('/api/auth/me', data);
 export const deleteAccount = () => API.delete('/api/auth/me');
+export const searchUsers = (q) => API.get('/api/auth/search?q=' + q);
 
 // Library
 export const addToLibrary = (data) => API.post('/api/library', data);
