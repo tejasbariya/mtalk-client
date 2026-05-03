@@ -3,6 +3,7 @@ import { useStore } from '../store/useStore';
 import { Edit3, Activity, BarChart2, Loader2, X } from 'lucide-react';
 import { updateProfile } from '../api/apiClient';
 import { toast } from '../components/ToastProvider.jsx';
+import { getAvatarUrl } from '../utils/avatarUtils.js';
 
 export default function Profile() {
   const user = useStore(state => state.user);
@@ -121,7 +122,7 @@ export default function Profile() {
         <div style={{ display: 'flex', alignItems: 'flex-end', gap: 'clamp(12px, 3vw, 24px)', transform: 'translateY(-40px)', marginBottom: '-16px' }}>
           {/* Profile Picture */}
           <div style={{ position: 'relative', flexShrink: 0 }}>
-            <img src={isEditing ? (form.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${form.username}`) : (user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`)}
+            <img src={isEditing ? (form.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${form.username}`) : (getAvatarUrl(user.avatar, user.username))}
               style={{ width: 'clamp(80px, 10vw, 120px)', height: 'clamp(80px, 10vw, 120px)', borderRadius: '50%', border: '4px solid var(--bg-elevated)', objectFit: 'cover', background: 'var(--bg-card)', boxShadow: 'var(--shadow-blue)' }} alt="profile picture" />
             {isEditing && (
               <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'rgba(0,0,0,0.6)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '12px', backdropFilter: 'blur(4px)', zIndex: 5 }}>

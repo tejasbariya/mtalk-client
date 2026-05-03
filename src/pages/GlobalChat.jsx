@@ -3,6 +3,7 @@ import { io } from 'socket.io-client';
 import { useStore } from '../store/useStore';
 import { Send, Hash, Users, Circle } from 'lucide-react';
 import API from '../api/apiClient';
+import getAvatarUrl from '../utils/avatarUtils'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5005';
 
@@ -29,7 +30,7 @@ export default function GlobalChat() {
   }, [user])
 
   useEffect(() => {
-    
+
     const token = useStore.getState().token;
     socketRef.current = io(API_URL, {
       auth: { token } 
@@ -99,7 +100,7 @@ export default function GlobalChat() {
             const isHighKarma = (msg.user?.karma || 0) > 100;
             return (
               <div key={i} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                <img src={msg.user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${msg.user?.username}`}
+                <img src={getAvatarUrl(msg.user?.avatar, msg.user?.username)}
                   style={{ width: 36, height: 36, borderRadius: '50%', border: `2px solid ${isHighKarma ? 'var(--gold-bright)' : 'var(--border-dim)'}`, objectFit: 'cover', flexShrink: 0 }} alt="" />
                 <div style={{ minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' }}>
@@ -163,7 +164,7 @@ export default function GlobalChat() {
               onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
             >
               <div style={{ position: 'relative' }}>
-                <img src={m.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${m.username}`} style={{ width: 32, height: 32, borderRadius: '50%', border: '1.5px solid var(--border-dim)' }} alt="" />
+                <img src={getAvatarUrl(m.avatar, m.username)} style={{ width: 32, height: 32, borderRadius: '50%', border: '1.5px solid var(--border-dim)' }} alt="" />
                 <span style={{ position: 'absolute', bottom: 0, right: 0, width: 9, height: 9, borderRadius: '50%', background: 'var(--green-bright)', border: '2px solid var(--bg-elevated)', boxShadow: '0 0 5px var(--green-glow)' }} />
               </div>
               <span style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text-secondary)' }}>{m.username}</span>

@@ -6,6 +6,7 @@ import { useStore } from '../store/useStore';
 import { toast } from '../components/ToastProvider.jsx';
 import { Star, Library, MessageSquare, Info, BookOpen, AlertCircle, CheckCircle, X, Loader2, Trash2 } from 'lucide-react';
 import { addToLibrary, submitReview, getTitleReviews, deleteReview } from '../api/apiClient';
+import { getAvatarUrl } from '../utils/avatarUtils.js';
 
 const statusMap = {
   RELEASING: { label: 'Ongoing', cls: 'badge-green' },
@@ -194,7 +195,7 @@ export default function TitleDetails() {
                   <div key={rev._id} style={{ padding: '16px', background: 'var(--bg-card)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-dim)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
                       <img 
-                        src={rev.user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${rev.user?.username}`} 
+                        src={getAvatarUrl(rev.user?.avatar, rev.user?.username)} 
                         alt="" 
                         style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover' }} 
                       />

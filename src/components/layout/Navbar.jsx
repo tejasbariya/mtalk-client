@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Search, Bell, X, ChevronDown } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { searchManhwa } from '../../api/anilist';
+import { getAvatarUrl } from '../../utils/avatarUtils';
 
 export default function Navbar() {
   const user = useStore(state => state.user);
@@ -137,7 +138,7 @@ export default function Navbar() {
             onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--border-blue)'}
             onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-dim)'}
           >
-            <img src={user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`}
+            <img src={getAvatarUrl(user.avatar, user.username)}
               style={{ width: 30, height: 30, borderRadius: '50%', objectFit: 'cover', border: '1.5px solid var(--border-blue)' }} alt="avatar" />
             <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
               <span style={{ fontSize: '13px', fontWeight: 600 }}>{user.username}</span>

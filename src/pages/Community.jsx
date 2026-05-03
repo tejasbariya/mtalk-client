@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useStore } from '../store/useStore';
 import { Activity, UserPlus, Search, Users } from 'lucide-react';
 import { searchUsers } from '../api/apiClient';
+import { getAvatarUrl } from '../utils/avatarUtils';
 
 export default function Community() {
   const user = useStore(state => state.user);
@@ -62,7 +63,7 @@ export default function Community() {
                 results.map((u, idx) => (
                   <div key={u._id || idx} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', borderBottom: idx === results.length - 1 ? 'none' : '1px solid var(--border-dim)', transition: 'background 0.2s' }}>
                     <img
-                      src={u.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${u.username}`}
+                      src={getAvatarUrl(u.avatar, u.username)}
                       style={{ width: 34, height: 34, borderRadius: '50%', background: 'var(--bg-card)', border: '1px solid var(--border-muted)', objectFit: 'cover' }}
                       alt=""
                     />
