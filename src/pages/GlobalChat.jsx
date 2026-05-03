@@ -5,7 +5,7 @@ import { Send, Hash, Users, Circle } from 'lucide-react';
 import API from '../api/apiClient';
 import getAvatarUrl from '../utils/avatarUtils'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5005';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export default function GlobalChat() {
   const user = useStore(state => state.user);
