@@ -3,7 +3,7 @@ import { io } from 'socket.io-client';
 import { useStore } from '../store/useStore';
 import { Send, Hash, Users, Circle } from 'lucide-react';
 import API from '../api/apiClient';
-import getAvatarUrl from '../utils/avatarUtils'
+import { getAvatarUrl } from '../utils/avatarUtils'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
