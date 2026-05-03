@@ -101,7 +101,7 @@ export default function Library() {
       ) : filteredEntries.length > 0 ? (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '16px' }}>
           {filteredEntries.map((item) => (
-            <Link key={item._id} to={'/manhwa/r/' + item.title.apiId} style={{ textDecoration: 'none', color: 'inherit' }}>
+            <Link key={item._id} to={`/manhwa/${item.title.apiId}`} style={{ textDecoration: 'none', color: 'inherit' }}>
               <div style={{ transition: 'transform 0.2s' }} className="hover-lift">
                 <div style={{ 
                   aspectRatio: '2/3', borderRadius: 'var(--radius-md)', overflow: 'hidden', 

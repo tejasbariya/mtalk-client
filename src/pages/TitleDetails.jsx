@@ -16,9 +16,8 @@ const statusMap = {
 };
 
 export default function TitleDetails() {
-  // slug is the AniList numeric ID (e.g. /manhwa/r/123456)
-  const { slug } = useParams();
-  const id = slug;
+  // id is the AniList numeric ID (e.g. /manhwa/123456)
+  const { id } = useParams();
 
   const { data: title, isLoading } = useQuery({
     queryKey: ['title', id],

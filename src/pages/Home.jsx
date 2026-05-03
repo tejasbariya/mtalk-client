@@ -53,7 +53,7 @@ export default function Home() {
                   transition={{ delay: idx * 0.06 }}
                   style={{ minWidth: 'clamp(220px, 28vw, 300px)', flexShrink: 0 }}
                 >
-                  <Link to={`/manhwa/r/${item.id}`} style={{ textDecoration: 'none', display: 'block' }}>
+                  <Link to={`/manhwa/${item.id}`} style={{ textDecoration: 'none', display: 'block' }}>
                     <div className="cover-card" style={{ paddingBottom: '140%', position: 'relative' }}>
                       <img src={item.coverImage.extraLarge || item.coverImage.large} alt={item.title.english}
                         style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -124,7 +124,7 @@ export default function Home() {
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: idx * 0.04 }}
                 >
-                  <Link to={`/manhwa/r/${item.id}`} style={{ textDecoration: 'none', display: 'block' }}>
+                  <Link to={`/manhwa/${item.id}`} style={{ textDecoration: 'none', display: 'block' }}>
                     <div className="cover-card" style={{ paddingBottom: '145%', position: 'relative', marginBottom: '10px' }}>
                       <img src={item.coverImage.large} alt={item.title.english}
                         style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />

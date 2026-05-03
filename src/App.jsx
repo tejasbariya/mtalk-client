@@ -22,7 +22,7 @@ function App() {
         {/* App pages — inside Layout */}
         <Route path="/" element={<Layout><Home /></Layout>} />
         <Route path="/discover" element={<Layout><Discover /></Layout>} />
-        <Route path="/manhwa/r/:slug" element={<Layout><TitleDetails /></Layout>} />
+        <Route path="/manhwa/:id" element={<Layout><TitleDetails /></Layout>} />
         <Route path="/library"   element={<Layout><Library /></Layout>} />
         <Route path="/chat"      element={<Layout><GlobalChat /></Layout>} />
         <Route path="/profile"   element={<Layout><Profile /></Layout>} />

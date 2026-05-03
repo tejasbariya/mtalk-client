@@ -91,7 +91,7 @@ export default function Navbar() {
           }}>
             {loading && <div style={{ padding: '16px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>Searching…</div>}
             {results.map(r => (
-              <Link key={r.id} to={`/manhwa/r/${r.id}`} onClick={() => { setOpen(false); setQuery(''); }}
+              <Link key={r.id} to={`/manhwa/${r.id}`} onClick={() => { setOpen(false); setQuery(''); }}
                 style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 16px', textDecoration: 'none', transition: 'var(--transition-base)', color: 'var(--text-primary)' }}
                 onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'}
                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}

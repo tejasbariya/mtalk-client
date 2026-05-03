@@ -68,7 +68,7 @@ export default function Discover() {
       {data && data.length > 0 && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: 'clamp(10px, 2vw, 18px)' }}>
           {data.map(item => (
-            <Link key={item.id} to={`/manhwa/r/${item.id}`} style={{ textDecoration: 'none', display: 'block' }}>
+            <Link key={item.id} to={`/manhwa/${item.id}`} style={{ textDecoration: 'none', display: 'block' }}>
               <div className="cover-card" style={{ paddingBottom: '145%', position: 'relative', marginBottom: 10 }}>
                 <img src={item.coverImage?.large} alt={item.title?.english}
                   style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
