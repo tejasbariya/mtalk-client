@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 import { useStore } from '../store/useStore';
 import { Send, Hash, Users, Circle } from 'lucide-react';
+import API from '../api/apiClient';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5005';
 
@@ -12,21 +13,40 @@ export default function GlobalChat() {
   const [input, setInput] = useState('');
   const socketRef = useRef(null);
   const endRef = useRef(null);
+  
+  // Fetch last 50 messages
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const res = await API.get('/api/chat/global');
+        setMessages(res.data.messages);
+      } catch (err) {
+        console.error('[CHAT_HISTORY]', err);
+      }
+    };
+
+    fetchHistory();
+  }, [user])
 
   useEffect(() => {
-    socketRef.current = io(API_URL);
     
+    const token = useStore.getState().token;
+    socketRef.current = io(API_URL, {
+      auth: { token } 
+    });
+    
+
     // Join with user data for member tracking
-    socketRef.current.emit('join_global', user ? { 
-      id: user.id, 
-      username: user.username, 
-      avatar: user.avatar 
-    } : null);
+    socketRef.current.emit('join_room', {
+      room: 'global',
+      user: user ? {
+        id: user.id,
+        username: user.username,
+        avatar: user.avatar
+      } : null
+    });
 
-    // Fetch last 50 messages
-    socketRef.current.emit('get_history', 'global');
 
-    socketRef.current.on('chat_history', (history) => setMessages(history));
     socketRef.current.on('receive_message', (msg) => setMessages(p => [...p, msg]));
     socketRef.current.on('room_members', (m) => setMembers(m));
 
@@ -40,9 +60,7 @@ export default function GlobalChat() {
     if (!input.trim() || !user) return;
     socketRef.current.emit('send_message', {
       room: 'global',
-      user: { id: user.id, username: user.username, avatar: user.avatar, karma: user.karma || 0 },
       text: input,
-      timestamp: new Date().toISOString(),
     });
     setInput('');
   };
