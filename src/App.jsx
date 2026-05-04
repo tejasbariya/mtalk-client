@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import Home from './pages/Home';
 import GlobalChat from './pages/GlobalChat';
+import TitleChat from './pages/TitleChat';
 import Discover from './pages/Discover';
 import TitleDetails from './pages/TitleDetails';
 import Library from './pages/Library';
@@ -25,6 +26,7 @@ function App() {
         <Route path="/manhwa/:id" element={<Layout><TitleDetails /></Layout>} />
         <Route path="/library"   element={<Layout><Library /></Layout>} />
         <Route path="/chat"      element={<Layout><GlobalChat /></Layout>} />
+        <Route path="/chat/:id" element={<Layout><TitleChat /></Layout>} />
         <Route path="/profile"   element={<Layout><Profile /></Layout>} />
         <Route path="/community" element={<Layout><Community /></Layout>} />
         <Route path="/settings"  element={<Layout><Settings /></Layout>} />

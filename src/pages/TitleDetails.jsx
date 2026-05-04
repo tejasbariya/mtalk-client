@@ -25,9 +25,9 @@ export default function TitleDetails() {
   });
   const queryClient = useQueryClient();
 
-  const { data: reviews, isLoading: isReviewsLoading } = useQuery({ 
-    queryKey: ['reviews', id], 
-    queryFn: async () => (await getTitleReviews(id)).data 
+  const { data: reviews, isLoading: isReviewsLoading } = useQuery({
+    queryKey: ['reviews', id],
+    queryFn: async () => (await getTitleReviews(id)).data
   });
 
   const user = useStore(state => state.user);
@@ -151,9 +151,11 @@ export default function TitleDetails() {
               <button onClick={handleAddToLibrary} className="btn-primary" style={{ fontSize: '13px', padding: '8px 18px' }}>
                 <Library size={15} /> Add to Library
               </button>
-              <button className="btn-ghost" style={{ fontSize: '13px', padding: '8px 18px' }}>
-                <MessageSquare size={15} /> Title Chat
-              </button>
+              <Link to={`/chat/${id}`}>
+                <button className="btn-ghost" style={{ fontSize: '13px', padding: '8px 18px' }}>
+                  <MessageSquare size={15} /> Title Chat
+                </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -193,10 +195,10 @@ export default function TitleDetails() {
                 {reviews.map(rev => (
                   <div key={rev._id} style={{ padding: '16px', background: 'var(--bg-card)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-dim)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-                      <img 
-                        src={getAvatarUrl(rev.user?.avatar, rev.user?.username)} 
-                        alt="" 
-                        style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover' }} 
+                      <img
+                        src={getAvatarUrl(rev.user?.avatar, rev.user?.username)}
+                        alt=""
+                        style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover' }}
                       />
                       <div style={{ fontSize: '13px', fontWeight: 700, flex: 1 }}>
                         {rev.user?.username}
@@ -205,7 +207,7 @@ export default function TitleDetails() {
                         </div>
                       </div>
                       {rev.user?._id === user?.id && (
-                        <button 
+                        <button
                           onClick={() => handleDeleteReview(rev._id)}
                           style={{ background: 'none', border: 'none', color: 'var(--text-dim)', cursor: 'pointer', padding: '4px', borderRadius: 'var(--radius-sm)', transition: 'var(--transition-base)' }}
                           onMouseEnter={e => e.currentTarget.style.color = 'var(--crimson-bright)'}
@@ -284,21 +286,21 @@ export default function TitleDetails() {
             <form onSubmit={handleReviewSubmit}>
               <div style={{ marginBottom: '16px' }}>
                 <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Rating (1-10)</label>
-                <input 
-                  type="number" min="1" max="10" 
-                  value={reviewForm.rating} 
+                <input
+                  type="number" min="1" max="10"
+                  value={reviewForm.rating}
                   onChange={e => setReviewForm({ ...reviewForm, rating: parseInt(e.target.value) })}
-                  className="input-base" 
-                  style={{ width: '80px', height: '40px', textAlign: 'center', fontSize: '16px', fontWeight: 700 }} 
+                  className="input-base"
+                  style={{ width: '80px', height: '40px', textAlign: 'center', fontSize: '16px', fontWeight: 700 }}
                 />
               </div>
               <div style={{ marginBottom: '24px' }}>
                 <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Your Review</label>
-                <textarea 
-                  rows={6} 
+                <textarea
+                  rows={6}
                   value={reviewForm.content}
                   onChange={e => setReviewForm({ ...reviewForm, content: e.target.value })}
-                  className="input-base" 
+                  className="input-base"
                   placeholder="Share your thoughts on this title..."
                   style={{ width: '100%', padding: '12px', resize: 'vertical', fontSize: '14px', lineHeight: 1.5 }}
                 />
