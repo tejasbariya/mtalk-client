@@ -49,6 +49,7 @@ export const deleteAccount = () => API.delete('/api/auth/me');
 export const searchUsers = (q) => API.get('/api/auth/search?q=' + q);
 
 // Library
+export const checkLibraryStatus = (apiId) => API.get('/api/library/check/' + apiId);
 export const addToLibrary = (data) => API.post('/api/library', data);
 export const getLibrary = () => API.get('/api/library');
 export const submitReview = (data) => API.post('/api/library/review', data);

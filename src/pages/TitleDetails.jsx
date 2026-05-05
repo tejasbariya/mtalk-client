@@ -4,8 +4,8 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchTitleDetails } from '../api/anilist';
 import { useStore } from '../store/useStore';
 import { toast } from '../components/ToastProvider.jsx';
-import { Star, Library, MessageSquare, Info, BookOpen, AlertCircle, CheckCircle, X, Loader2, Trash2 } from 'lucide-react';
-import { addToLibrary, submitReview, getTitleReviews, deleteReview } from '../api/apiClient';
+import { Star, Library, MessageSquare, Info, BookOpen, AlertCircle, CheckCircle, X, Loader2, Trash2, ChevronDown, Bookmark, CheckCheck, PauseCircle } from 'lucide-react';
+import { checkLibraryStatus, addToLibrary, submitReview, getTitleReviews, deleteReview } from '../api/apiClient';
 import { getAvatarUrl } from '../utils/avatarUtils.js';
 
 const statusMap = {
@@ -18,33 +18,50 @@ const statusMap = {
 export default function TitleDetails() {
   // id is the AniList numeric ID (e.g. /manhwa/123456)
   const { id } = useParams();
+  const queryClient = useQueryClient();
+  const user = useStore(state => state.user);
 
+  const [showModal, setShowModal] = useState(false);
+  const [reviewForm, setReviewForm] = useState({ content: '', rating: 10 });
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  // Fetch title details from AniList API
   const { data: title, isLoading } = useQuery({
     queryKey: ['title', id],
     queryFn: () => fetchTitleDetails(Number(id)),
   });
-  const queryClient = useQueryClient();
 
+  // Fetch reviews for this title from our backend
   const { data: reviews, isLoading: isReviewsLoading } = useQuery({
     queryKey: ['reviews', id],
     queryFn: async () => (await getTitleReviews(id)).data
   });
 
-  const user = useStore(state => state.user);
-  const [showModal, setShowModal] = useState(false);
-  const [reviewForm, setReviewForm] = useState({ content: '', rating: 10 });
+  // Check if title is in user's library
+  const { data: libraryData, refetch: refetchLibraryStatus } = useQuery({
+    queryKey: ['libraryStatus', id],
+    queryFn: async () => (await checkLibraryStatus(id)).data,
+    enabled: !!user // Only fetch if logged in
+  });
+  const currentLibraryEntry = libraryData?.entry;
 
-  const handleAddToLibrary = async () => {
+  // Handles both adding to library for the first time AND updating status if already in library
+  const handleStatusChange = (newStatus) => {
     if (!user) {
-      toast.error('You must be logged in to add titles to your library.');
+      toast.error('You must be logged in to update your library.');
       return;
     }
+    handleAddToLibrary(newStatus);
+  };
 
+
+  // Handles BOTH adding for the first time AND updating the status
+  const handleAddToLibrary = async (newStatus) => {
     try {
       await addToLibrary({
         titleId: title.id,
         user: { id: user.id, username: user.username },
-        status: 'Reading', // Default status
+        status: newStatus,
         titleDetails: {
           title: title.title.english || title.title.romaji,
           coverImage: title.coverImage.extraLarge,
@@ -52,6 +69,8 @@ export default function TitleDetails() {
         }
       });
       toast.success('Successfully added to library!');
+      toast.success(currentLibraryEntry ? `Status updated to ${newStatus}` : `Added to ${newStatus}`);
+      refetchLibraryStatus();
     } catch (err) {
       console.error('Failed to add to library:', err);
       toast.error('Failed to add to library. Please try again.');
@@ -101,13 +120,19 @@ export default function TitleDetails() {
 
   if (!title) return <div style={{ textAlign: 'center', paddingTop: 60, color: 'var(--text-muted)' }}>Title not found.</div>;
 
-  const status = statusMap[title.status] || { label: title.status, cls: 'badge-gray' };
+  const statuses = [
+    { value: 'Reading', label: 'Reading', icon: <BookOpen size={14} /> },
+    { value: 'Plan to Read', label: 'Plan to Read', icon: <Bookmark size={14} /> },
+    { value: 'Completed', label: 'Completed', icon: <CheckCheck size={14} /> },
+    { value: 'On Hold', label: 'On Hold', icon: <PauseCircle size={14} /> },
+    { value: 'Dropped', label: 'Dropped', icon: <Trash2 size={14} /> },
+  ];
 
   return (
     <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 'clamp(16px, 2.5vw, 28px)' }}>
 
       {/* ── Hero Banner ── */}
-      <div style={{ position: 'relative', borderRadius: 'var(--radius-xl)', overflow: 'hidden', minHeight: 'clamp(240px, 40vw, 400px)', background: 'var(--bg-card)' }}>
+      <div style={{ position: 'relative', borderRadius: 'var(--radius-xl)', overflow: 'visible', minHeight: 'clamp(240px, 40vw, 400px)', background: 'var(--bg-card)' }}>
         {title.bannerImage && (
           <img src={title.bannerImage} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.4, filter: 'blur(2px)' }} />
         )}
@@ -148,9 +173,61 @@ export default function TitleDetails() {
             </h1>
 
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-              <button onClick={handleAddToLibrary} className="btn-primary" style={{ fontSize: '13px', padding: '8px 18px' }}>
-                <Library size={15} /> Add to Library
-              </button>
+              {currentLibraryEntry ? (
+                <div style={{ position: 'relative' }}>
+                  <button
+                    onClick={() => setDropdownOpen(o => !o)}
+                    style={{
+                      appearance: 'none', background: 'var(--blue-subtle)', color: 'var(--blue-neon)',
+                      border: '1px solid var(--border-blue)', padding: '8px 36px 8px 18px',
+                      borderRadius: 'var(--radius-full)', fontSize: '13px', fontWeight: 600,
+                      cursor: 'pointer', outline: 'none', boxShadow: 'var(--shadow-blue)',
+                      display: 'flex', alignItems: 'center', gap: '6px',
+                    }}
+                  >
+                    {(() => {
+                      const current = statuses.find(s => s.value === currentLibraryEntry.status);
+                      return <>{current?.icon}{current?.label || currentLibraryEntry.status}</>;
+                    })()}
+                    <ChevronDown size={14} style={{ position: 'absolute', right: 14, color: 'var(--blue-neon)' }} />
+                  </button>
+
+                  {dropdownOpen && (
+                    <>
+                      <div onClick={() => setDropdownOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 9 }} />
+                      <div style={{
+                        position: 'absolute', top: 'calc(100% + 6px)', left: 0, zIndex: 10,
+                        background: 'var(--bg-elevated)', border: '1px solid var(--border-blue)',
+                        borderRadius: 'var(--radius-md)', overflow: 'hidden',
+                        boxShadow: 'var(--shadow-blue)', minWidth: '160px',
+                      }}>
+                        {statuses.map(s => (
+                          <div
+                            key={s.value}
+                            onClick={() => { handleStatusChange(s.value); setDropdownOpen(false); }}
+                            style={{
+                              padding: '9px 16px', fontSize: '13px', fontWeight: 500,
+                              display: 'flex', alignItems: 'center', gap: '8px',
+                              color: s.value === currentLibraryEntry.status ? 'var(--blue-neon)' : 'var(--text-secondary)',
+                              background: s.value === currentLibraryEntry.status ? 'var(--blue-subtle)' : 'transparent',
+                              cursor: 'pointer', transition: 'var(--transition-base)',
+                            }}
+                            onMouseEnter={e => e.currentTarget.style.background = 'var(--blue-subtle)'}
+                            onMouseLeave={e => e.currentTarget.style.background = s.value === currentLibraryEntry.status ? 'var(--blue-subtle)' : 'transparent'}
+                          >
+                            {s.icon}
+                            {s.label}
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+              ) : (
+                <button onClick={() => handleStatusChange('Reading')} className="btn-primary" style={{ fontSize: '13px', padding: '8px 18px' }}>
+                  <Library size={15} /> Add to Library
+                </button>
+              )}
               <Link to={`/chat/${id}`}>
                 <button className="btn-ghost" style={{ fontSize: '13px', padding: '8px 18px' }}>
                   <MessageSquare size={15} /> Title Chat
