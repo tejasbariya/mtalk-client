@@ -11,6 +11,7 @@ import Settings from './pages/Settings';
 import Community from './pages/Community';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Notifications from './pages/Notifications';
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
         <Route path="/profile"   element={<Layout><Profile /></Layout>} />
         <Route path="/community" element={<Layout><Community /></Layout>} />
         <Route path="/settings"  element={<Layout><Settings /></Layout>} />
+        <Route path="/notifications" element={<Layout><Notifications /></Layout>} />
 
         {/* 404 */}
         <Route path="*" element={

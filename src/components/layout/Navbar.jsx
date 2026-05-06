@@ -4,6 +4,8 @@ import { Search, Bell, X, ChevronDown } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { searchManhwa } from '../../api/anilist';
 import { getAvatarUrl } from '../../utils/avatarUtils';
+import { useNotifications } from '../../store/notificationsStore';
+import { getPendingRequests } from '../../api/apiClient';
 
 export default function Navbar() {
   const user = useStore(state => state.user);
@@ -13,6 +15,19 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const searchRef = useRef(null);
   const navigate = useNavigate();
+  const setNotifications = useNotifications(state => state.setNotifications);
+  const unreadCount = useNotifications(state => state.notifications.filter(n => !n.read).length);
+
+  useEffect(() => {
+    if (user) {
+      getPendingRequests()
+        .then(res => setNotifications(res.data))
+        .catch(err => console.error('[NAV NOTIFS]', err));
+    } else {
+      setNotifications([]);
+    }
+  }, [user, setNotifications]);
+
 
   useEffect(() => {
     if (!query.trim()) { setResults([]); setOpen(false); return; }
@@ -99,7 +114,7 @@ export default function Navbar() {
                 <img src={r.coverImage?.large} alt="" style={{ width: 36, height: 50, borderRadius: 6, objectFit: 'cover', flexShrink: 0, border: '1px solid var(--border-dim)' }} />
                 <div>
                   <div style={{ fontSize: '13px', fontWeight: 600, lineHeight: 1.3 }}>{r.title?.english || r.title?.romaji}</div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{r.status?.replace('_',' ')}</div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{r.status?.replace('_', ' ')}</div>
                 </div>
               </Link>
             ))}
@@ -110,42 +125,40 @@ export default function Navbar() {
 
       {/* Right Actions */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-        <button style={{
-          position: 'relative', width: 38, height: 38, borderRadius: 'var(--radius-md)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: 'var(--glass-bg)', border: '1px solid var(--border-dim)',
-          cursor: 'pointer', color: 'var(--text-secondary)', transition: 'var(--transition-base)'
-        }}
+        < Link to="/notifications" style={{ position: 'relative', width: 38, height: 38, borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--glass-bg)', border: '1px solid var(--border-dim)', cursor: 'pointer', color: 'var(--text-secondary)', transition: 'var(--transition-base)' }}
           onMouseEnter={e => { e.currentTarget.style.background = 'var(--blue-subtle)'; e.currentTarget.style.borderColor = 'var(--border-blue)'; }}
           onMouseLeave={e => { e.currentTarget.style.background = 'var(--glass-bg)'; e.currentTarget.style.borderColor = 'var(--border-dim)'; }}
         >
           <Bell size={17} />
-          <span style={{
-            position: 'absolute', top: '7px', right: '7px',
-            width: 8, height: 8, borderRadius: '50%',
-            background: 'var(--crimson-warm)', border: '2px solid var(--bg-surface)',
-            boxShadow: '0 0 6px var(--crimson-glow)'
-          }} />
-        </button>
+          {/* if newnotifications exist, show red dot on bell icon */}
+          {unreadCount > 0 && (
+            <span style={{
+              position: 'absolute', top: '7px', right: '7px',
+              width: 8, height: 8, borderRadius: '50%',
+              background: 'var(--crimson-warm)', border: '2px solid var(--bg-surface)',
+              boxShadow: '0 0 6px var(--crimson-glow)'
+            }} />
+          )}
+        </Link>
 
         {user ? (
           <Link to="/profile">
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 10px 4px 4px',
-            background: 'var(--glass-bg)', border: '1px solid var(--border-dim)',
-            borderRadius: 'var(--radius-full)', cursor: 'pointer', transition: 'var(--transition-base)'
-          }}
-            onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--border-blue)'}
-            onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-dim)'}
-          >
-            <img src={getAvatarUrl(user.avatar, user.username)}
-              style={{ width: 30, height: 30, borderRadius: '50%', objectFit: 'cover', border: '1.5px solid var(--border-blue)' }} alt="avatar" />
-            <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
-              <span style={{ fontSize: '13px', fontWeight: 600 }}>{user.username}</span>
-              <span className="karma-high" style={{ fontSize: '11px' }}>{user.karma} K</span>
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 10px 4px 4px',
+              background: 'var(--glass-bg)', border: '1px solid var(--border-dim)',
+              borderRadius: 'var(--radius-full)', cursor: 'pointer', transition: 'var(--transition-base)'
+            }}
+              onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--border-blue)'}
+              onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-dim)'}
+            >
+              <img src={getAvatarUrl(user.avatar, user.username)}
+                style={{ width: 30, height: 30, borderRadius: '50%', objectFit: 'cover', border: '1.5px solid var(--border-blue)' }} alt="avatar" />
+              <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
+                <span style={{ fontSize: '13px', fontWeight: 600 }}>{user.username}</span>
+                <span className="karma-high" style={{ fontSize: '11px' }}>{user.karma} K</span>
+              </div>
+              <ChevronDown size={13} style={{ color: 'var(--text-muted)' }} />
             </div>
-            <ChevronDown size={13} style={{ color: 'var(--text-muted)' }} />
-          </div>
           </Link>
         ) : (
           <Link to="/login">
