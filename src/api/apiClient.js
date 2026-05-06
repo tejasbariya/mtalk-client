@@ -55,4 +55,6 @@ export const getLibrary = () => API.get('/api/library');
 export const submitReview = (data) => API.post('/api/library/review', data);
 export const getTitleReviews = (titleId) => API.get('/api/library/reviews/' + titleId);
 export const deleteReview = (reviewId) => API.delete('/api/library/review/' + reviewId);
+export const upvoteReview = (reviewId) => API.post(`/api/votes/review/${reviewId}/upvote`);
+export const downvoteReview = (reviewId) => API.post(`/api/votes/review/${reviewId}/downvote`);
 export default API;

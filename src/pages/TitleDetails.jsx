@@ -4,8 +4,8 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchTitleDetails } from '../api/anilist';
 import { useStore } from '../store/useStore';
 import { toast } from '../components/ToastProvider.jsx';
-import { Star, Library, MessageSquare, Info, BookOpen, AlertCircle, CheckCircle, X, Loader2, Trash2, ChevronDown, Bookmark, CheckCheck, PauseCircle } from 'lucide-react';
-import { checkLibraryStatus, addToLibrary, submitReview, getTitleReviews, deleteReview } from '../api/apiClient';
+import { Star, Library, MessageSquare, Info, BookOpen, AlertCircle, CheckCircle, X, Loader2, Trash2, ChevronDown, Bookmark, CheckCheck, PauseCircle, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { checkLibraryStatus, addToLibrary, submitReview, getTitleReviews, deleteReview, upvoteReview, downvoteReview } from '../api/apiClient';
 import { getAvatarUrl } from '../utils/avatarUtils.js';
 
 const statusMap = {
@@ -77,6 +77,7 @@ export default function TitleDetails() {
     }
   };
 
+  // Handles review submission
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
     if (!user) return toast.error('You must be logged in to post a review.');
@@ -97,6 +98,22 @@ export default function TitleDetails() {
     }
   };
 
+  // Handles both upvoting and downvoting a review
+  const handleVote = async (reviewId, type) => {
+    if (!user) return toast.error('You must be logged in to vote on reviews.');
+    try {
+      if (type === 'up') {
+        await upvoteReview(reviewId);
+      } else if (type === 'down') {
+        await downvoteReview(reviewId);
+      }
+      queryClient.invalidateQueries({ queryKey: ['reviews', id] });
+    } catch (err) {
+      toast.error('Failed to submit vote');
+    }
+  };
+
+  // Only allow users to delete their own reviews, and confirm before deleting
   const handleDeleteReview = async (reviewId) => {
     if (!window.confirm('Are you sure you want to delete this review?')) return;
     try {
@@ -108,6 +125,7 @@ export default function TitleDetails() {
     }
   };
 
+  // Loading state
   if (isLoading) return (
     <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
       <div className="skeleton" style={{ height: 380, borderRadius: 'var(--radius-lg)', marginBottom: 24 }} />
@@ -118,8 +136,10 @@ export default function TitleDetails() {
     </div>
   );
 
+  // Error state (e.g. invalid ID)
   if (!title) return <div style={{ textAlign: 'center', paddingTop: 60, color: 'var(--text-muted)' }}>Title not found.</div>;
 
+  // Map AniList status to our UI status badge
   const statuses = [
     { value: 'Reading', label: 'Reading', icon: <BookOpen size={14} /> },
     { value: 'Plan to Read', label: 'Plan to Read', icon: <Bookmark size={14} /> },
@@ -295,6 +315,29 @@ export default function TitleDetails() {
                       )}
                     </div>
                     <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>{rev.content}</p>
+
+                    {/* VOTE ACTIONS */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', borderTop: '1px solid var(--border-dim)', paddingTop: '12px' }}>
+                      {(() => {
+                        // Safely check for arrays because old DB entries might have numbers
+                        const isUpvoted = Array.isArray(rev.upvotes) ? rev.upvotes.includes(user?.id) : false;
+                        const isDownvoted = Array.isArray(rev.downvotes) ? rev.downvotes.includes(user?.id) : false;
+                        const upvoteCount = Array.isArray(rev.upvotes) ? rev.upvotes.length : (rev.upvotes || 0);
+                        const downvoteCount = Array.isArray(rev.downvotes) ? rev.downvotes.length : (rev.downvotes || 0);
+
+                        return (
+                          <>
+                            <button onClick={() => handleVote(rev._id, 'up')} style={{ background: isUpvoted ? 'var(--blue-subtle)' : 'none', border: isUpvoted ? '1px solid var(--border-blue)' : '1px solid transparent', color: isUpvoted ? 'var(--blue-neon)' : 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 600, transition: 'var(--transition-base)', padding: '4px 10px', borderRadius: 'var(--radius-full)' }}>
+                              <ThumbsUp size={14} fill={isUpvoted ? "currentColor" : "none"} /> {upvoteCount}
+                            </button>
+                            <button onClick={() => handleVote(rev._id, 'down')} style={{ background: isDownvoted ? 'var(--crimson-subtle)' : 'none', border: isDownvoted ? '1px solid var(--border-crimson)' : '1px solid transparent', color: isDownvoted ? 'var(--crimson-warm)' : 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 600, transition: 'var(--transition-base)', padding: '4px 10px', borderRadius: 'var(--radius-full)' }}>
+                              <ThumbsDown size={14} fill={isDownvoted ? "currentColor" : "none"} /> {downvoteCount}
+                            </button>
+                          </>
+                        );
+                      })()}
+                    </div>
+
                   </div>
                 ))}
               </div>
