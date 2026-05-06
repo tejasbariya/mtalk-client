@@ -57,4 +57,13 @@ export const getTitleReviews = (titleId) => API.get('/api/library/reviews/' + ti
 export const deleteReview = (reviewId) => API.delete('/api/library/review/' + reviewId);
 export const upvoteReview = (reviewId) => API.post(`/api/votes/review/${reviewId}/upvote`);
 export const downvoteReview = (reviewId) => API.post(`/api/votes/review/${reviewId}/downvote`);
+
+// Friends
+export const sendFriendRequest = (receiverId) => API.post(`/api/friends/request/${receiverId}`);
+export const acceptFriendRequest = (requestId) => API.post(`/api/friends/accept/${requestId}`);
+export const declineFriendRequest = (requestId) => API.post(`/api/friends/decline/${requestId}`);
+export const getPendingRequests = () => API.get('/api/friends/pending');
+export const getFriendsList = () => API.get('/api/friends/list');
+
+
 export default API;
