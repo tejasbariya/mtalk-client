@@ -28,7 +28,7 @@ function App() {
         <Route path="/library"   element={<Layout><Library /></Layout>} />
         <Route path="/chat"      element={<Layout><GlobalChat /></Layout>} />
         <Route path="/chat/:id" element={<Layout><TitleChat /></Layout>} />
-        <Route path="/profile"   element={<Layout><Profile /></Layout>} />
+        <Route path="/profile/:id"   element={<Layout><Profile /></Layout>} />
         <Route path="/community" element={<Layout><Community /></Layout>} />
         <Route path="/settings"  element={<Layout><Settings /></Layout>} />
         <Route path="/notifications" element={<Layout><Notifications /></Layout>} />

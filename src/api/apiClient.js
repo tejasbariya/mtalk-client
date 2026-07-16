@@ -65,5 +65,7 @@ export const declineFriendRequest = (requestId) => API.post(`/api/friends/declin
 export const getPendingRequests = () => API.get('/api/friends/pending');
 export const getFriendsList = () => API.get('/api/friends/list');
 
+// Profile
+export const getProfile = (userId) => API.get(`/api/profile/${userId}`);
 
 export default API;
