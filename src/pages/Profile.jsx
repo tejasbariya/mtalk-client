@@ -265,7 +265,7 @@ export default function Profile() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {reviews.map(r => (
                   <div key={r.id || r._id} style={{ padding: '12px', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)' }}>
-                    <p style={{ fontSize: 14, fontWeight: 600 }}>{r.bookTitle || r.title}</p>
+                    <p style={{ fontSize: 14, fontWeight: 600 }}>{r.book?.title || r.bookTitle?.title || r.title}</p>
                     <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{r.content || r.text}</p>
                   </div>
                 ))}
