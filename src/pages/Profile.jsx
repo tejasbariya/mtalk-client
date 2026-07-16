@@ -7,11 +7,11 @@ import { toast } from '../components/ToastProvider.jsx';
 import { getAvatarUrl } from '../utils/avatarUtils.js';
 
 export default function Profile() {
-  const { userId } = useParams();
+  const { id } = useParams();
   const currentUser = useStore(state => state.user);
 
-  // Which profile are we viewing? If no :userId in the route, default to "me".
-  const targetUserId = userId || currentUser?.id;
+  // Which profile are we viewing? If no :id in the route, default to "me".
+  const targetUserId = id || currentUser?.id;
   const isOwnProfile = !!currentUser && String(targetUserId) === String(currentUser.id);
 
   const [profileData, setProfileData] = useState(null); // { user, reviews, libraryStats, isFriend }
@@ -48,7 +48,7 @@ export default function Profile() {
     fetchProfile();
   }, [fetchProfile]);
 
-  if (!currentUser && !userId) {
+  if (!currentUser && !id) {
     return (
       <div style={{ textAlign: 'center', paddingTop: 80, color: 'var(--text-muted)' }}>
         Please <strong style={{ color: 'var(--blue-neon)' }}>sign in</strong> to view your profile.
@@ -265,7 +265,7 @@ export default function Profile() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {reviews.map(r => (
                   <div key={r.id || r._id} style={{ padding: '12px', border: '1px solid var(--border-dim)', borderRadius: 'var(--radius-md)' }}>
-                    <p style={{ fontSize: 14, fontWeight: 600 }}>{r.book?.title || r.bookTitle?.title || r.title}</p>
+                    <p style={{ fontSize: 14, fontWeight: 600 }}>{r.bookTitle || r.title}</p>
                     <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{r.content || r.text}</p>
                   </div>
                 ))}
