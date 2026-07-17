@@ -118,7 +118,7 @@ export default function TitleChat() {
                                         </span>
                                         <span className="karma-badge">{msg.user?.karma} K</span>
                                         <span style={{ fontSize: '11px', color: 'var(--text-dim)' }}>
-                                            {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                         </span>
                                     </div>
                                     <div style={{

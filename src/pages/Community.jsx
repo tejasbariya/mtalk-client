@@ -86,7 +86,7 @@ export default function Community() {
               {results.length > 0 ? (
                 results.map((u, idx) => (
                   <div key={u._id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', borderBottom: idx === results.length - 1 ? 'none' : '1px solid var(--border-dim)', transition: 'background 0.2s' }}>
-                    <Link to={`/profile/${u._id}`} style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, textDecoration: 'none', minWidth: 0 }}>
+                    <Link to={`/profile/${u.username}`} style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, textDecoration: 'none', minWidth: 0 }}>
                       <img src={getAvatarUrl(u.avatar, u.username)} style={{ width: 34, height: 34, borderRadius: '50%', background: 'var(--bg-card)', border: '1px solid var(--border-muted)', objectFit: 'cover', flexShrink: 0 }} alt="" />
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{u.username}</div>
@@ -123,7 +123,7 @@ export default function Community() {
               <div style={{ maxHeight: '300px', overflowY: 'auto' }} className="hide-scrollbar">
                 {friends.map((friend, idx) => (
                   <div key={friend._id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', borderBottom: idx === friends.length - 1 ? 'none' : '1px solid var(--border-dim)' }}>
-                    <Link to={`/profile/${friend._id}`} style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, textDecoration: 'none', minWidth: 0 }}>
+                    <Link to={`/profile/${friend.username}`} style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, textDecoration: 'none', minWidth: 0 }}>
                       <img src={getAvatarUrl(friend.avatar, friend.username)} style={{ width: 34, height: 34, borderRadius: '50%', background: 'var(--bg-card)', border: '1px solid var(--border-muted)', objectFit: 'cover', flexShrink: 0 }} alt="" />
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{friend.username}</div>
