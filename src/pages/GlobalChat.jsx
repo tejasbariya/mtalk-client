@@ -4,6 +4,7 @@ import { useStore } from '../store/useStore';
 import { Send, Hash, Users, Circle } from 'lucide-react';
 import API from '../api/apiClient';
 import { getAvatarUrl } from '../utils/avatarUtils'
+import { Link } from 'react-router-dom';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -14,7 +15,7 @@ export default function GlobalChat() {
   const [input, setInput] = useState('');
   const socketRef = useRef(null);
   const endRef = useRef(null);
-  
+
   // Fetch last 50 messages
   useEffect(() => {
     const fetchHistory = async () => {
@@ -33,9 +34,9 @@ export default function GlobalChat() {
 
     const token = useStore.getState().token;
     socketRef.current = io(API_URL, {
-      auth: { token } 
+      auth: { token }
     });
-    
+
 
     // Join with user data for member tracking
     socketRef.current.emit('join_room', {
@@ -100,18 +101,22 @@ export default function GlobalChat() {
             const isHighKarma = (msg.user?.karma || 0) > 100;
             return (
               <div key={i} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                <img src={getAvatarUrl(msg.user?.avatar, msg.user?.username)}
-                  style={{ width: 36, height: 36, borderRadius: '50%', border: `2px solid ${isHighKarma ? 'var(--gold-bright)' : 'var(--border-dim)'}`, objectFit: 'cover', flexShrink: 0 }} alt="" />
+                <Link to={`/u/${msg.username}`} style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, textDecoration: 'none', minWidth: 0 }}>
+                  <img src={getAvatarUrl(msg.user?.avatar, msg.user?.username)}
+                    style={{ width: 36, height: 36, borderRadius: '50%', border: `2px solid ${isHighKarma ? 'var(--gold-bright)' : 'var(--border-dim)'}`, objectFit: 'cover', flexShrink: 0 }} alt="" />
+                </Link>
                 <div style={{ minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: '13px', fontWeight: 700, color: isHighKarma ? 'var(--gold-warm)' : 'var(--text-primary)' }}>
-                      {msg.user?.username}
-                    </span>
-                    <span className="karma-badge">{msg.user?.karma} K</span>
-                    <span style={{ fontSize: '11px', color: 'var(--text-dim)' }}>
-                      {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                  </div>
+                  <Link to={`/u/${msg.username}`} style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, textDecoration: 'none', minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: '13px', fontWeight: 700, color: isHighKarma ? 'var(--gold-warm)' : 'var(--text-primary)' }}>
+                        {msg.user?.username}
+                      </span>
+                      <span className="karma-badge">{msg.user?.karma} K</span>
+                      <span style={{ fontSize: '11px', color: 'var(--text-dim)' }}>
+                        {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+                  </Link>
                   <div style={{
                     display: 'inline-block', background: isHighKarma ? 'rgba(245,158,11,0.07)' : 'var(--bg-hover)',
                     border: `1px solid ${isHighKarma ? 'var(--border-gold)' : 'var(--border-dim)'}`,
@@ -163,11 +168,13 @@ export default function GlobalChat() {
               onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'}
               onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
             >
-              <div style={{ position: 'relative' }}>
-                <img src={getAvatarUrl(m.avatar, m.username)} style={{ width: 32, height: 32, borderRadius: '50%', border: '1.5px solid var(--border-dim)' }} alt="" />
-                <span style={{ position: 'absolute', bottom: 0, right: 0, width: 9, height: 9, borderRadius: '50%', background: 'var(--green-bright)', border: '2px solid var(--bg-elevated)', boxShadow: '0 0 5px var(--green-glow)' }} />
-              </div>
-              <span style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text-secondary)' }}>{m.username}</span>
+              <Link to={`/u/${m.username}`} style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, textDecoration: 'none', minWidth: 0 }}>
+                <div style={{ position: 'relative' }}>
+                  <img src={getAvatarUrl(m.avatar, m.username)} style={{ width: 32, height: 32, borderRadius: '50%', border: '1.5px solid var(--border-dim)' }} alt="" />
+                  <span style={{ position: 'absolute', bottom: 0, right: 0, width: 9, height: 9, borderRadius: '50%', background: 'var(--green-bright)', border: '2px solid var(--bg-elevated)', boxShadow: '0 0 5px var(--green-glow)' }} />
+                </div>
+                <span style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text-secondary)' }}>{m.username}</span>
+              </Link>
             </div>
           ))}
         </div>
@@ -176,6 +183,6 @@ export default function GlobalChat() {
       <style>{`
         @media (max-width: 768px) { .chat-sidebar { display: none !important; } }
       `}</style>
-    </div>
+    </div >
   );
 }

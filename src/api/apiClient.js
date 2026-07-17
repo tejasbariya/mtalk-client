@@ -67,6 +67,6 @@ export const getPendingRequests = () => API.get('/api/friends/pending');
 export const getFriendsList = () => API.get('/api/friends/list');
 
 // Profile
-export const getProfile = (userId) => API.get(`/api/profile/${userId}`);
+export const getProfile = (username) => API.get(`/api/profile/${username}`);
 
 export default API;

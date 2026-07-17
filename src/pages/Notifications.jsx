@@ -80,7 +80,7 @@ export default function Notifications() {
                     pendingRequests.map((req) => (
                         //  create a card for each pending request with accept and decline button with nice design and show username and avatar of sender with text of accept and decline with nice button of logo  button and on click of accept and decline button it calls the respective function to accept and decline the request and remove the card from the list also the buttons should have hover effect and also show the toast message on accept and decline of request and also the card should have a nice design with avatar and username of sender and also show the time of request in a nice format like 2 hours ago, 1 day ago etc 
                         <div key={req._id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid var(--border-dim)' }}>
-                            <Link to={`/profile/${req.sender.username}`} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                            <Link to={`/u/${req.sender.username}`} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                                 <img src={getAvatarUrl(req.sender.avatar)} alt="avatar" style={{ width: 40, height: 40, borderRadius: '50%' }} />
                                 <span>{req.sender.username}</span>
                                 <span style={{ color: 'var(--text-muted)', fontSize: '14px' }}>{formatTimeAgo(req.timestamp)}</span>

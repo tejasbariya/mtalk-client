@@ -18,19 +18,20 @@ function App() {
     <Router>
       <Routes>
         {/* Auth pages — NO layout wrapper (full screen) */}
-        <Route path="/login"    element={<Login />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
         {/* App pages — inside Layout */}
         <Route path="/" element={<Layout><Home /></Layout>} />
         <Route path="/discover" element={<Layout><Discover /></Layout>} />
         <Route path="/manhwa/:id" element={<Layout><TitleDetails /></Layout>} />
-        <Route path="/library"   element={<Layout><Library /></Layout>} />
-        <Route path="/chat"      element={<Layout><GlobalChat /></Layout>} />
+        <Route path="/library" element={<Layout><Library /></Layout>} />
+        <Route path="/chat" element={<Layout><GlobalChat /></Layout>} />
         <Route path="/chat/:id" element={<Layout><TitleChat /></Layout>} />
-        <Route path="/profile/:id"   element={<Layout><Profile /></Layout>} />
+        <Route path="/profile" element={<Layout><Profile /></Layout>} />
+        <Route path="/u/:username" element={<Layout><Profile /></Layout>} />
         <Route path="/community" element={<Layout><Community /></Layout>} />
-        <Route path="/settings"  element={<Layout><Settings /></Layout>} />
+        <Route path="/settings" element={<Layout><Settings /></Layout>} />
         <Route path="/notifications" element={<Layout><Notifications /></Layout>} />
 
         {/* 404 */}

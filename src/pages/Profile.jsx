@@ -7,12 +7,12 @@ import { toast } from '../components/ToastProvider.jsx';
 import { getAvatarUrl } from '../utils/avatarUtils.js';
 
 export default function Profile() {
-  const { id } = useParams();
-  const currentUser = useStore(state => state.user);
+  const { username } = useParams();
+  const currentUser = useStore(state => state.user.username);
 
   // Which profile are we viewing? If no :id in the route, default to "me".
-  const targetUserId = id || currentUser?.id;
-  const isOwnProfile = !!currentUser && String(targetUserId) === String(currentUser.id);
+  const targetUsername = username || currentUser?.username;
+  const isOwnProfile = !!currentUser && String(targetUsername) === String(currentUser.id);
 
   const [profileData, setProfileData] = useState(null); // { user, reviews, libraryStats, isFriend }
   const [pageLoading, setPageLoading] = useState(true);
@@ -23,11 +23,11 @@ export default function Profile() {
   const [saving, setSaving] = useState(false);
 
   const fetchProfile = useCallback(async () => {
-    if (!targetUserId) return;
+    if (!targetUsername) return;
     setPageLoading(true);
     setPageError(null);
     try {
-      const res = await getProfile(targetUserId);
+      const res = await getProfile(targetUsername);
       setProfileData(res.data);
       const u = res.data.user;
       setForm({
@@ -42,7 +42,7 @@ export default function Profile() {
     } finally {
       setPageLoading(false);
     }
-  }, [targetUserId]);
+  }, [targetUsername]);
 
   useEffect(() => {
     fetchProfile();
