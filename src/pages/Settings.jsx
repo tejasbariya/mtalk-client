@@ -1,10 +1,12 @@
 import { Settings as SettingsIcon, Upload, Bell, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
-import { deleteAccount } from '../api/apiClient';
+import { deleteAccount, updateProfile, batchAddLibrary } from '../api/apiClient';
 import { toast } from '../components/ToastProvider.jsx';
 
 export default function Settings() {
+  const user = useStore((state) => state.user);
+  const setUser = useStore((state) => state.setUser);
   const logout = useStore((state) => state.logout);
   const navigate = useNavigate();
 
@@ -33,6 +35,78 @@ export default function Settings() {
     }
   };
 
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const text = event.target.result;
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(text, "text/xml");
+        const animes = xmlDoc.getElementsByTagName("anime");
+
+        const entries = [];
+        for (let i = 0; i < animes.length; i++) {
+          const anime = animes[i];
+          const titleId = anime.getElementsByTagName("series_animedb_id")[0]?.textContent;
+          const title = anime.getElementsByTagName("series_title")[0]?.textContent;
+          const coverImage = anime.getElementsByTagName("series_image")[0]?.textContent || '';
+          const myStatus = anime.getElementsByTagName("my_status")[0]?.textContent;
+
+          let status = 'Plan to Read';
+          if (myStatus === 'Completed') status = 'Completed';
+          else if (myStatus === 'Watching' || myStatus === 'Reading') status = 'Reading';
+          else if (myStatus === 'On Hold') status = 'On Hold';
+          else if (myStatus === 'Dropped') status = 'Dropped';
+
+          if (titleId && title) {
+            entries.push({ titleId, title, coverImage, status, titleStatus: 'Finished', source: 'MAL' });
+          }
+        }
+
+        if (entries.length > 0) {
+          toast.success(`Found ${entries.length} entries. Importing...`);
+          const res = await batchAddLibrary({ entries });
+          toast.success(res.data.message || 'Import successful!');
+        } else {
+          toast.error('No valid entries found in XML.');
+        }
+      } catch (err) {
+        console.error('Upload failed', err);
+        toast.error('Upload failed');
+      } finally {
+        e.target.value = null;
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const handleNotificationToggle = async (key, currentValue) => {
+    try {
+      const newSettings = {
+        notifications: {
+          ...user?.settings?.notifications,
+          [key]: !currentValue
+        }
+      };
+      const res = await updateProfile({ settings: newSettings });
+      setUser(res.data.user);
+      toast.success('Settings updated');
+    } catch (err) {
+      toast.error('Failed to update settings');
+    }
+  };
+
+  const notifications = [
+    { key: 'newChapterReleases', label: 'New Chapter Releases', desc: 'Get notified when a new chapter drops for your library titles', defaultOn: true },
+    { key: 'friendRequests', label: 'Friend Requests', desc: 'When someone sends you a friend request', defaultOn: true },
+    { key: 'karmaMilestones', label: 'Karma Milestones', desc: 'When your karma reaches a new milestone', defaultOn: true },
+    { key: 'chatMentions', label: 'Chat Mentions', desc: 'When someone @mentions you in a chat', defaultOn: true },
+    { key: 'hiatusAlerts', label: 'Hiatus Alerts', desc: 'When a title in your library goes on hiatus', defaultOn: false },
+  ];
+
   return (
     <div style={{ maxWidth: '720px', margin: '0 auto' }}>
       <h1 className="section-heading" style={{ marginBottom: '28px' }}>
@@ -54,7 +128,7 @@ export default function Settings() {
             <Upload size={28} color="var(--gold-warm)" style={{ display: 'block', margin: '0 auto 10px', opacity: 0.6 }} />
             <p style={{ fontWeight: 600, color: 'var(--gold-warm)', marginBottom: 4, fontSize: '14px' }}>Drop your MAL XML file here</p>
             <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>or click to browse files</p>
-            <input type="file" accept=".xml" style={{ display: 'none' }} />
+            <input type="file" accept=".xml" style={{ display: 'none' }} onChange={handleFileUpload} />
           </label>
         </div>
 
@@ -64,31 +138,33 @@ export default function Settings() {
             <Bell size={18} color="var(--green-neon)" />
             <h2 style={{ fontSize: '16px', fontWeight: 700, fontFamily: 'Space Grotesk, sans-serif' }}>Notifications</h2>
           </div>
-          {[
-            ['New Chapter Releases', 'Get notified when a new chapter drops for your library titles', true],
-            ['Friend Requests', 'When someone sends you a friend request', true],
-            ['Karma Milestones', 'When your karma reaches a new milestone', true],
-            ['Chat Mentions', 'When someone @mentions you in a chat', true],
-            ['Hiatus Alerts', 'When a title in your library goes on hiatus', false],
-          ].map(([label, desc, defaultOn]) => (
-            <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 0', borderBottom: '1px solid var(--border-dim)' }}>
-              <div>
-                <div style={{ fontSize: '14px', fontWeight: 600, marginBottom: '2px' }}>{label}</div>
-                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{desc}</div>
+          {notifications.map(({ key, label, desc, defaultOn }) => {
+            const isChecked = user?.settings?.notifications?.[key] ?? defaultOn;
+            return (
+              <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 0', borderBottom: '1px solid var(--border-dim)' }}>
+                <div>
+                  <div style={{ fontSize: '14px', fontWeight: 600, marginBottom: '2px' }}>{label}</div>
+                  <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{desc}</div>
+                </div>
+                <label style={{ position: 'relative', width: 44, height: 24, flexShrink: 0, cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={isChecked}
+                    onChange={() => handleNotificationToggle(key, isChecked)}
+                    style={{ opacity: 0, width: 0, height: 0 }}
+                  />
+                  <span style={{
+                    position: 'absolute', inset: 0, borderRadius: 12,
+                    background: isChecked ? 'var(--blue-bright)' : 'var(--gray-700)',
+                    transition: 'var(--transition-base)',
+                    boxShadow: isChecked ? '0 0 8px var(--blue-glow)' : 'none',
+                  }}>
+                    <span style={{ position: 'absolute', top: 3, left: isChecked ? 23 : 3, width: 18, height: 18, borderRadius: '50%', background: '#fff', transition: 'var(--transition-base)' }} />
+                  </span>
+                </label>
               </div>
-              <label style={{ position: 'relative', width: 44, height: 24, flexShrink: 0, cursor: 'pointer' }}>
-                <input type="checkbox" defaultChecked={defaultOn} style={{ opacity: 0, width: 0, height: 0 }} />
-                <span style={{
-                  position: 'absolute', inset: 0, borderRadius: 12,
-                  background: defaultOn ? 'var(--blue-bright)' : 'var(--gray-700)',
-                  transition: 'var(--transition-base)',
-                  boxShadow: defaultOn ? '0 0 8px var(--blue-glow)' : 'none',
-                }}>
-                  <span style={{ position: 'absolute', top: 3, left: defaultOn ? 23 : 3, width: 18, height: 18, borderRadius: '50%', background: '#fff', transition: 'var(--transition-base)' }} />
-                </span>
-              </label>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Security */}
